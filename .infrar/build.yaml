@@ -5,9 +5,8 @@ dockerfileContent: |
   WORKDIR /app
   COPY package.json ./
   RUN npm install --omit=dev
-  COPY . .
-  RUN addgroup -S appgroup && adduser -S appuser -G appgroup && chown -R appuser:appgroup /app
-  USER appuser
+  COPY server.js ./server.js
+  COPY public ./public
   EXPOSE 3000
 run:
   command: node server.js
@@ -18,8 +17,3 @@ healthcheck:
 env:
   - name: PORT
     default: "3000"
-  - name: HOST
-    default: 0.0.0.0
-  - name: API_BASE
-    default: /api
-    from: orbit-api
