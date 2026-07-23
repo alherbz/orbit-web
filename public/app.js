@@ -43,4 +43,39 @@ form.addEventListener('submit', async (e) => {
   load();
 });
 
+// Welcome modal — greets users on their first visit.
+(function initWelcomeModal() {
+  const overlay = document.querySelector('#welcome-overlay');
+  const closeBtn = document.querySelector('#welcome-close');
+  if (!overlay || !closeBtn) return;
+
+  const STORAGE_KEY = 'orbit-welcome-seen';
+  let alreadySeen = false;
+  try {
+    alreadySeen = localStorage.getItem(STORAGE_KEY) === '1';
+  } catch {
+    /* localStorage unavailable — show the modal anyway */
+  }
+
+  if (alreadySeen) return;
+  overlay.hidden = false;
+
+  const dismiss = () => {
+    overlay.hidden = true;
+    try {
+      localStorage.setItem(STORAGE_KEY, '1');
+    } catch {
+      /* ignore storage errors */
+    }
+  };
+
+  closeBtn.addEventListener('click', dismiss);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) dismiss();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !overlay.hidden) dismiss();
+  });
+})();
+
 load();
