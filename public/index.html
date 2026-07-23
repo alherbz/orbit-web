@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Orbit — Tasks</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Orbit</h1>
+        <p class="sub">Team tasks · running on an Infrar Application Preview</p>
+      </header>
+
+      <form id="new-task">
+        <input id="title" placeholder="Add a task…" autocomplete="off" required />
+        <select id="priority">
+          <option value="low">low</option>
+          <option value="medium" selected>medium</option>
+          <option value="high">high</option>
+        </select>
+        <button type="submit">Add</button>
+      </form>
+
+      <ul id="tasks"></ul>
+      <p id="status" class="status"></p>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
