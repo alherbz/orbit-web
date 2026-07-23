@@ -3,10 +3,16 @@ strategy: dockerfile
 dockerfileContent: |
   FROM node:20-alpine
   WORKDIR /app
+
+  # Install production dependencies first for better layer caching.
   COPY package.json ./
-  RUN npm install --omit=dev
-  COPY server.js ./server.js
-  COPY public ./public
+  RUN npm install --omit=dev || npm install
+
+  # Copy the full application context so the runnable entrypoint
+  # (server.js) and static assets are guaranteed to land at /app.
+  # .dockerignore keeps node_modules/.git/logs out of the image.
+  COPY . .
+
   EXPOSE 3000
 run:
   command: node server.js
