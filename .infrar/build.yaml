@@ -1,19 +1,13 @@
 schema_version: 1
 strategy: dockerfile
 dockerfileContent: |
-  FROM node:20-alpine
+  FROM node:20-slim
   WORKDIR /app
-  # Install production dependencies first for better layer caching.
   COPY package.json ./
-  RUN npm install --omit=dev || npm install
-  # Copy the application source, including the server entrypoint and static assets.
-  COPY server.js ./server.js
-  COPY public ./public
-  RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-  USER appuser
-  ENV PORT=3000
+  RUN npm install --omit=dev
+  COPY . .
+  USER node
   EXPOSE 3000
-  CMD ["node", "server.js"]
 run:
   command: node server.js
   port: 3000
@@ -23,5 +17,3 @@ healthcheck:
 env:
   - name: PORT
     default: "3000"
-  - name: INFRAR_INTERNAL_URL_orbit-api
-    from: orbit-api
