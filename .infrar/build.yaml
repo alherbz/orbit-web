@@ -1,24 +1,14 @@
 schema_version: 1
 strategy: dockerfile
-# Build from the repo's root Dockerfile (canonical build artifact). The
-# Dockerfile explicitly copies server.js and public/ to /app so the run
-# command below resolves /app/server.js.
-dockerfile: Dockerfile
-dockerfilePath: Dockerfile
-context: .
 dockerfileContent: |
   FROM node:20-alpine
   WORKDIR /app
-  # Install production dependencies first for better layer caching.
   COPY package.json ./
-  RUN npm install --omit=dev || npm install
-  # Copy the application source explicitly so the runnable entrypoint
-  # (server.js) and static assets are guaranteed to land at /app.
-  COPY server.js ./server.js
-  COPY public ./public
-  ENV PORT=3000
+  RUN npm install --omit=dev
+  COPY . .
+  RUN addgroup -S appgroup && adduser -S appuser -G appgroup && chown -R appuser:appgroup /app
+  USER appuser
   EXPOSE 3000
-  CMD ["node", "server.js"]
 run:
   command: node server.js
   port: 3000
@@ -28,5 +18,8 @@ healthcheck:
 env:
   - name: PORT
     default: "3000"
-  - name: INFRAR_INTERNAL_URL_orbit-api
+  - name: HOST
+    default: 0.0.0.0
+  - name: API_BASE
+    default: /api
     from: orbit-api
