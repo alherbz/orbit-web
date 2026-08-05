@@ -5,18 +5,17 @@ name: orbit-web
 node: .
 category: app
 ---
-
 ## Purpose
-orbit-web is a small self-contained web application node providing an HTTP server (server.js) that serves a static client (public/) and likely exposes API endpoints consumed by the browser front-end. Packaged for containerized deployment via Dockerfile.
+orbit-web is the browser-facing app node of the Orbit task board. It is a small Node.js/Express server (`server.js`) that serves a static client from `public/` and proxies the client's `/api/*` calls to the separate API node. It is packaged for containerized deployment via an inline Dockerfile in `.infrar/build.yaml` (a root `Dockerfile` also exists).
 
 ## Structure
-Root contains build/runtime configuration and the server entrypoint. server.js is the Node.js HTTP server. package.json declares dependencies and npm scripts (start/build). public/ holds the browser assets: index.html (markup shell), app.js (client logic), styles.css (styling). Dockerfile plus .dockerignore define the container image; .gitignore excludes local artifacts; README.md documents usage.
+The repo root holds `server.js` (the only server code), `package.json`, `Dockerfile`, and `README.md`. `public/` contains the entire client: `index.html` (page shell, including the first-visit welcome modal whose title reads "CIAOO! BENVENTUOO!", the task form, and the task list), `app.js` (all client logic: task loading/rendering, form submission, welcome-modal show/dismiss), and `styles.css`. `.infrar/build.yaml` defines the build: `node:20-alpine`, `npm install --omit=dev`, `COPY . .`, run command `node server.js` on port 3000 with a healthcheck on `/`.
 
 ## Behavior
-On startup, server.js boots a listener (typically reading a PORT env var) and serves files from public/ to browsers. The client app.js runs in the browser, manipulating the DOM defined by index.html and issuing requests back to the server. The Dockerfile builds an image that installs dependencies and runs the server as the container's main process.
+On startup `server.js` listens on `0.0.0.0` at `PORT` (env, default 8080 in code; the build spec sets `PORT=3000`). It mounts `http-proxy-middleware` on `/api`, forwarding to `API_URL` (env, wired by Infrar; the `^/api` prefix is stripped before forwarding) and serves `public/` statically for everything else. In the browser, `app.js` fetches `/api/tasks` on load, renders the task list with priority badges, and posts new tasks from the form. A welcome modal (`#welcome-overlay`) shows on first visit only — it is gated by the `orbit-welcome-seen` localStorage key and can be dismissed via the "Get started" button, a click on the backdrop, or the Escape key; dismissal persists the flag. If localStorage is unavailable the modal still shows.
 
 ## Dependencies
-Runtime is Node.js; concrete third-party packages (e.g., a web framework or static file server) are declared in package.json. The Docker image depends on a Node base image. The client depends only on the assets bundled in public/. Verify exact package versions and the entrypoint command in package.json/Dockerfile.
+Runtime is Node.js >= 20 (ES modules). Third-party packages: `express` ^4.19.2 (static serving) and `http-proxy-middleware` ^3.0.3 (API proxying). The client is dependency-free vanilla JS/CSS. At runtime the node depends on the API node reachable at `API_URL` for all `/api/tasks` data; without it the UI shows "Could not reach the API" in the status line.
 
 ## Notes
-Inspect server.js for the port, routing, and any API surface. Confirm package.json scripts and whether a build step transforms public/ assets. Ensure .dockerignore excludes node_modules to keep image builds reproducible.
+The server binds all interfaces and reads `PORT` from the environment, matching the platform's networking contract. The client uses only same-origin relative paths (`/api/tasks`), so no CORS or hardcoded hosts are involved. Note the port mismatch between the code default (8080) and the build spec (3000) is harmless because the build spec always sets `PORT`. The welcome modal text lives directly in `public/index.html` (`#welcome-title`); its behavior lives in the IIFE at the bottom of `public/app.js`.
