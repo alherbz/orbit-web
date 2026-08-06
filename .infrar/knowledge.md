@@ -5,17 +5,18 @@ name: orbit-web
 node: .
 category: app
 ---
+
 ## Purpose
-orbit-web is the browser-facing app node of the Orbit task board. It is a small Node.js/Express server (`server.js`) that serves a static client from `public/` and proxies the client's `/api/*` calls to the separate API node. It is packaged for containerized deployment via an inline Dockerfile in `.infrar/build.yaml` (a root `Dockerfile` also exists).
+Orbit is a web application providing a team task board, served via a Node.js server, with a frontend welcome modal that greets users.
 
 ## Structure
-The repo root holds `server.js` (the only server code), `package.json`, `Dockerfile`, and `README.md`. `public/` contains the entire client: `index.html` (page shell, including the first-visit welcome modal whose title reads "Buongiorno utente!", the task form, and the task list), `app.js` (all client logic: task loading/rendering, form submission, welcome-modal show/dismiss), and `styles.css`. `.infrar/build.yaml` defines the build: `node:20-alpine`, `npm install --omit=dev`, `COPY . .`, run command `node server.js` on port 3000 with a healthcheck on `/`.
+Frontend static assets live under public/ (index.html, app.js, styles.css), served by server.js (node server.js on port 3000). The welcome modal markup is in index.html, its behavior/logic in app.js, and its visual styling in styles.css.
 
 ## Behavior
-On startup `server.js` listens on `0.0.0.0` at `PORT` (env, default 8080 in code; the build spec sets `PORT=3000`). It mounts `http-proxy-middleware` on `/api`, forwarding to `API_URL` (env, wired by Infrar; the `^/api` prefix is stripped before forwarding) and serves `public/` statically for everything else. In the browser, `app.js` fetches `/api/tasks` on load, renders the task list with priority badges, and posts new tasks from the form. A welcome modal (`#welcome-overlay`, title "Buongiorno utente!") shows on first visit only — it is gated by the `orbit-welcome-seen` localStorage key and can be dismissed via the "Get started" button, a click on the backdrop, or the Escape key; dismissal persists the flag. If localStorage is unavailable the modal still shows.
+On load, the app displays a welcome modal (#welcome-title heading plus body copy). The modal's title and body text are now rendered in bold via explicit font-weight: 700 on the .modal h2 and .modal p selectors, ensuring consistent bold styling for the whole sentence rather than relying on the browser default or the isolated <strong>Orbit</strong> tag. No HTML structure or JS logic changed.
 
 ## Dependencies
-Runtime is Node.js >= 20 (ES modules). Third-party packages: `express` ^4.19.2 (static serving) and `http-proxy-middleware` ^3.0.3 (API proxying). The client is dependency-free vanilla JS/CSS. At runtime the node depends on the API node reachable at `API_URL` for all `/api/tasks` data; without it the UI shows "Could not reach the API" in the status line.
+No new dependencies introduced; relies on existing static file serving via server.js and existing CSS variables (--muted, --text, --accent).
 
 ## Notes
-The server binds all interfaces and reads `PORT` from the environment, matching the platform's networking contract. The client uses only same-origin relative paths (`/api/tasks`), so no CORS or hardcoded hosts are involved. The port mismatch between the code default (8080) and the build spec (3000) is harmless because the build spec always sets `PORT`. The welcome modal text lives directly in `public/index.html` (`#welcome-title`); its behavior lives in the IIFE at the bottom of `public/app.js`.
+This is a purely cosmetic CSS change; the previous history of iterative welcome-title text edits (multiple past commits) has been superseded and the git history entries removed, but the current state reflects only the bold styling change on top of the 'Buongiorno utente!' text.
