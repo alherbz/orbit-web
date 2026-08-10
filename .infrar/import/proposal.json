@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "name": "orbit-web",
+      "kind": "app",
+      "path": ".",
+      "role": "frontend",
+      "summary": "Express server serving the static Tasks UI and proxying /api/* to the orbit-api service (API_URL, PORT env)."
+    }
+  ],
+  "sharedFolders": [],
+  "repoWideOther": false,
+  "branches": [
+    { "name": "main", "classification": "permanent", "reason": "Default branch (origin/HEAD)." },
+    { "name": "develop", "classification": "permanent", "reason": "Long-lived integration branch." }
+  ]
+}
