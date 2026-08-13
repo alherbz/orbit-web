@@ -7,6 +7,6 @@ parent_branch: null
 
 | Id | Name | Entrypoint | Category |
 |---|---|---|---|
-| 0618f6df-dccd-476b-81c2-b8a9158c433c | orbit-web | . | app |
+| 46c8491e-581c-4f3d-99f1-2a9fefde99b5 | orbit-web | . | app |
 
 ## Metadata
