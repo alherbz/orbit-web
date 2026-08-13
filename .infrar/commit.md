@@ -4,11 +4,11 @@ id: 46c8491e-581c-4f3d-99f1-2a9fefde99b5
 name: orbit-web
 node: .
 branch: develop
-previous_commit: c5caeee7b03b2f56a68924e49b74e5867879f137
+previous_commit: 7c7650522f0bec4f10cd3bb8da3e0517c56c96ad
 ---
 
 ## What changed
-- Nothing in the code. This is a verification retry: the per-task Share action (inline email form posting to `/api/tasks/:id/share`) is already committed in `c5caeee`.
+In `.infrar/build.yaml`, an `API_URL` env entry was added with `from: orbit-api`. The knowledge file's Dependencies section was updated to describe the wiring. No application code was touched.
 
 ## Why
-The previous build failed with a repository-access error: the cluster could not clone the repo because the cloud SSH key was not registered with the git provider. The user has now added the key in Settings → Git, so the build only needs to be re-run — no code or build-spec fix is required.
+`server.js` proxies `/api/*` to the address in `API_URL`, but the variable was never declared in the build spec, so previews never injected it and the proxy fell back to `http://localhost:3001` — every API call from the browser failed. Wiring `API_URL` from the `orbit-api` node makes the preview inject the api node's real address, completing the preview wiring.
