@@ -170,6 +170,8 @@ input::placeholder { color: var(--muted); }
 
 /* ---------- Cards ---------- */
 .cards { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+/* display:grid above would override the UA's [hidden] rule — keep hidden lists hidden */
+.cards[hidden] { display: none; }
 .card {
   background: var(--card);
   border: 1px solid var(--line);

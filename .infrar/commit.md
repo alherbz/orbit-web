@@ -4,19 +4,12 @@ id: 46c8491e-581c-4f3d-99f1-2a9fefde99b5
 name: orbit-web
 node: .
 branch: develop
-previous_commit: 78e502b78879eba6c1d43696669e30a879799471
+previous_commit: 57c18edddb7b8ed0b6d7e0f490cf89ff2c57b22e
 ---
 
 ## What changed
-
-In `.infrar/build.yaml`, the `API_URL` env entry now reads `from: api`
-instead of `from: orbit-api`. No application code changed.
+- `public/styles.css`: added a `.cards[hidden] { display: none; }` rule right after the `.cards` declaration, plus a comment explaining why it is needed.
+- `.infrar/knowledge.md`: Notes section now documents the `[hidden]` guard on `.cards`.
 
 ## Why
-
-The `from:` value must name the node as the project graph knows it. The
-backend node is named `api` in the graph; `orbit-api` was the repo-level
-name from root.md, which matched no link, so the preview never injected
-`API_URL` and the `/api` proxy in `server.js` fell back to
-`http://localhost:3001`. Wiring from `api` lets the preview inject the
-backend's address.
+The board redesign gave `.cards` a `display: grid` rule. An author-set `display` overrides the browser's default `[hidden] { display: none }`, so when app.js set `hidden` on the `#skeleton` list after loading, the three placeholder skeleton cards remained visible — users saw three tasks "stuck loading" above the correctly rendered list. The explicit `[hidden]` guard (the same pattern already used for `.share-form` and `.modal-overlay`) restores the intended one-state-at-a-time board.
