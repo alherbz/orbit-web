@@ -24,4 +24,4 @@ env:
   - name: PORT
     default: "3000"
   - name: API_URL
-    from: orbit-api
+    from: api
