@@ -15,25 +15,59 @@
       </div>
     </div>
 
-    <main>
-      <header>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo" aria-hidden="true"></span>
         <h1>Orbit</h1>
-        <p class="sub">Team tasks · running on an Infrar Application Preview</p>
-      </header>
+      </div>
+      <p id="health-chip" class="chip" role="status">
+        <span class="chip-dot" aria-hidden="true"></span>
+        <span class="chip-text">Checking API…</span>
+      </p>
+    </header>
 
-      <form id="new-task">
-        <input id="title" placeholder="Add a task…" autocomplete="off" required />
-        <select id="priority">
-          <option value="low">low</option>
-          <option value="medium" selected>medium</option>
-          <option value="high">high</option>
-        </select>
-        <button type="submit">Add</button>
-      </form>
+    <main>
+      <section class="composer" aria-labelledby="composer-heading">
+        <h2 id="composer-heading" class="sr-only">Add a task</h2>
+        <form id="new-task">
+          <div class="field field--grow">
+            <label for="title">New task</label>
+            <input id="title" name="title" placeholder="e.g. Prepare the launch checklist" autocomplete="off" required />
+          </div>
+          <div class="field">
+            <label for="priority">Priority</label>
+            <select id="priority" name="priority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-primary">Add task</button>
+        </form>
+        <p id="form-msg" class="form-msg" role="alert" hidden></p>
+      </section>
 
-      <ul id="tasks"></ul>
-      <p id="status" class="status"></p>
+      <div class="toolbar">
+        <nav class="filters" aria-label="Filter tasks">
+          <button type="button" class="filter is-active" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="filter" data-filter="open" aria-pressed="false">Open</button>
+          <button type="button" class="filter" data-filter="done" aria-pressed="false">Done</button>
+        </nav>
+        <p id="count" class="count"></p>
+      </div>
+
+      <section aria-label="Task board">
+        <ul id="skeleton" class="cards" aria-hidden="true">
+          <li class="card card--skeleton"><span class="sk sk--badge"></span><span class="sk sk--line"></span></li>
+          <li class="card card--skeleton"><span class="sk sk--badge"></span><span class="sk sk--line sk--short"></span></li>
+          <li class="card card--skeleton"><span class="sk sk--badge"></span><span class="sk sk--line"></span></li>
+        </ul>
+        <ul id="tasks" class="cards" hidden></ul>
+        <p id="empty" class="state" hidden></p>
+        <p id="error" class="state state--error" role="alert" hidden></p>
+      </section>
     </main>
+
     <script src="/app.js"></script>
   </body>
 </html>
