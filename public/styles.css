@@ -30,10 +30,22 @@ button {
 }
 ul { list-style: none; padding: 0; margin: 0; }
 .task {
-  display: flex; align-items: center; gap: 12px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 14px 16px; border: 1px solid var(--line);
   border-radius: 12px; background: var(--card); margin-bottom: 10px;
 }
+.share-toggle {
+  background: transparent; border-color: var(--line); color: var(--muted);
+  font-size: 12px; font-weight: 500; padding: 4px 10px;
+}
+.share-toggle:hover { color: var(--text); border-color: var(--accent); }
+.share-form { display: flex; gap: 8px; flex-basis: 100%; margin: 4px 0 0; }
+.share-form[hidden] { display: none; }
+.share-form input { flex: 1; padding: 8px 10px; font-size: 14px; }
+.share-form button { font-size: 14px; padding: 8px 14px; }
+.share-msg { flex-basis: 100%; font-size: 13px; margin: 4px 0 0; }
+.share-msg.ok { color: #22c55e; }
+.share-msg.err { color: #ef4444; }
 .task.done .title { text-decoration: line-through; color: var(--muted); }
 .title { flex: 1; }
 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
