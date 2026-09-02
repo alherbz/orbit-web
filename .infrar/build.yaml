@@ -3,7 +3,7 @@ strategy: dockerfile
 dockerfile: Dockerfile
 context: node
 run:
-  command: ["node", "server.js"]
+  command: node server.js
   port: 8080
 healthcheck:
   path: /
