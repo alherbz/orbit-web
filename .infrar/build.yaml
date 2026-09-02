@@ -1,0 +1,16 @@
+schema_version: 1
+strategy: dockerfile
+dockerfile: Dockerfile
+context: node
+run:
+  command: ["node", "server.js"]
+  port: 8080
+healthcheck:
+  path: /
+  port: 8080
+env:
+  - name: PORT
+    default: "8080"
+  - name: API_URL
+    from: api
+    part: origin
