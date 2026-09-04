@@ -1,16 +1,27 @@
 schema_version: 1
 strategy: dockerfile
-dockerfile: Dockerfile
-context: node
+dockerfileContent: |
+  FROM node:20-alpine
+  WORKDIR /app
+
+  # Install production dependencies first for better layer caching.
+  COPY package.json ./
+  RUN npm install --omit=dev || npm install
+
+  # Copy the full application context so the runnable entrypoint
+  # (server.js) and static assets are guaranteed to land at /app.
+  # .dockerignore keeps node_modules/.git/logs out of the image.
+  COPY . .
+
+  EXPOSE 3000
 run:
   command: node server.js
-  port: 8080
+  port: 3000
 healthcheck:
   path: /
-  port: 8080
+  port: 3000
 env:
   - name: PORT
-    default: "8080"
+    default: "3000"
   - name: API_URL
     from: api
-    part: origin
