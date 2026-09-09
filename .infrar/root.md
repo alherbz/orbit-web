@@ -1,12 +1,11 @@
 ---
 schema_version: 1
-parent_branch: main
 ---
 
 ## Nodes
 
 | Id | Name | Entrypoint | Category |
 |---|---|---|---|
-| c0a8bf6f-3189-4425-9d77-1be1e34d99a1 | orbit-web | . | app |
+| 46c8491e-581c-4f3d-99f1-2a9fefde99b5 | orbit-web | . | app |
 
 ## Metadata
