@@ -16,7 +16,7 @@ Small Express front-end server for the Orbit Tasks UI: it serves the static clie
 | server.js | Express entrypoint: proxy middleware for `/api/*`, the `/health` liveness route, static file serving and the HTTP listener bound to 0.0.0.0 |
 
 ## Surface
-**Exposes** — HTTP server listening on `PORT` (default `8080`), bound to `0.0.0.0`. Routes: `GET /health` returning JSON `{ status: 'ok', service: 'orbit-web' }`; `/api/*` reverse-proxied to the `orbit-api` backend; everything else served as static assets from the `public` directory (the Tasks UI).
+**Exposes** — HTTP server on `PORT` (default `8080`). `GET /health` answers `{ status, service, version }` for liveness probes; `/api/*` is proxied to orbit-api; everything else is served from `public`.
 
 **Consumes** — Environment variables: `API_URL` (upstream base URL of the `orbit-api` node, wired from the `api` node in preview environments) and `PORT` (default `8080`). Packages: `express` for routing/static serving plus an HTTP proxy middleware for the `/api/*` forwarding. Services: the `orbit-api` backend, which itself manages tasks and sends email through Resend — this node holds no database or mail credentials of its own.
 
