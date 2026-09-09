@@ -21,6 +21,11 @@ app.use(
   }),
 );
 
+// Liveness probe for the platform: answers without touching the api node.
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok', service: 'orbit-web' });
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(PORT, '0.0.0.0', () => {
