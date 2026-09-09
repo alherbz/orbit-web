@@ -23,7 +23,12 @@ app.use(
 
 // Liveness probe for the platform: answers without touching the api node.
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'orbit-web', version: process.env.APP_VERSION ?? 'dev' });
+  res.json({
+    status: 'ok',
+    service: 'orbit-web',
+    version: process.env.APP_VERSION ?? 'dev',
+    uptime: process.uptime(),
+  });
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
