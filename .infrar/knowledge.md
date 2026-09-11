@@ -14,9 +14,9 @@ category: app
 |---|---|
 | server.js | The entire server: `http-proxy-middleware` on `/api` toward `API_URL`, a self-contained `GET /health`, `express.static` over `public/`, and the listener bound to `0.0.0.0` |
 | package.json | ESM (`"type": "module"`), Node >= 20, `start` = `node server.js`; deps are only `express` and `http-proxy-middleware` |
-| public/index.html | Static shell: welcome modal, topbar (logo, `.branch-badge`, `#health-chip`), composer form `#new-task`, filter nav, and the four board containers `#skeleton` / `#tasks` / `#empty` / `#error` |
+| public/index.html | Static shell: welcome modal, topbar (logo, `.branch-badge`, `#health-chip`), composer form `#new-task` (fields `#title` and `#priority`), filter nav, and the four board containers `#skeleton` / `#tasks` / `#empty` / `#error` |
 | public/app.js | All client logic, plain DOM, no build: `checkHealth`, `load`, `render`, `showBoard`, `taskCard`, `wireShare`, filter wiring, new-task submit, `initWelcomeModal` |
-| public/styles.css | Dark theme via `:root` custom properties; card/badge/chip/skeleton/modal styling, `[hidden]` guards, mobile breakpoint, `.branch-badge` |
+| public/styles.css | Dark theme via `:root` custom properties; card/badge/chip/skeleton/modal styling, `[hidden]` guards, mobile breakpoint, `.branch-badge`, and the composer field/label rules |
 | Dockerfile | Repo-root image recipe (`node:20-alpine`, explicit `COPY server.js` + `COPY public`, `ENV PORT=3000`) — reference only; the platform builds from the inline spec below |
 | .dockerignore | Keeps `node_modules`, `.git`, `.infrar` and logs out of the build context |
 | .infrar/build.yaml | The spec the platform actually builds and runs: inline `dockerfileContent`, `run.command`/`run.port` 3000, healthcheck on `/`, `env` = `PORT` (default `3000`) and `API_URL` (`from: api`) |
@@ -39,9 +39,12 @@ category: app
 
 **Creating a task.** `#new-task` submit POSTs `{ title, priority }` to `/api/tasks`, then calls `load()` again — the list is always re-fetched rather than patched locally.
 
+**Composer labels.** Both composer labels share `.field label` (uppercase, 12px, `--muted`); the Priority one is then overridden to `--danger` red by `.field label[for="priority"]`, which is keyed on the `for` attribute that binds it to `#priority`. The generic rule still governs the "New task" label.
+
 **Welcome modal.** `initWelcomeModal` runs as an IIFE: it shows `#welcome-overlay` unless `localStorage['orbit-welcome-seen'] === '1'`, and dismisses on the button, a backdrop click or Escape. Every `localStorage` access is wrapped in try/catch — if storage is unavailable the modal simply shows every visit.
 
 ## Notes
+- **The Priority label's red is attribute-scoped.** `.field label[for="priority"]` only matches because `index.html` keeps `for="priority"` on that label and `id="priority"` on the select. Renaming either — or dropping the `for` (which would also break the label/control association for screen readers) — silently reverts the label to `--muted`.
 - **Port disagreement is real and deliberate-looking but fragile.** `server.js` defaults to `8080`, the root `Dockerfile` sets `ENV PORT=3000`, and `build.yaml` declares `PORT` default `"3000"` with `run.port: 3000`. The platform path works only because build.yaml supplies `PORT`; the inline `dockerfileContent` (unlike the root Dockerfile) sets no `ENV PORT`. Change one of the three and the pod binds a port nothing probes.
 - **The root `Dockerfile` is not what gets built.** `build.yaml` carries its own inline `dockerfileContent` that does `COPY . .` instead of the explicit `COPY server.js` / `COPY public`. The two have drifted before (see the `fix(build)` run in the history); edits to the root Dockerfile alone change nothing in preview.
 - **Healthcheck points at `/`, not `/health`.** Both `build.yaml` and the preview pod probe `GET /`, which is `index.html` from the static middleware. `/health` exists and is intentionally dependency-free — adding an upstream call to it would make the platform restart this node whenever `orbit-api` degrades.

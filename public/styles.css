@@ -120,6 +120,7 @@ main {
   text-transform: uppercase;
   color: var(--muted);
 }
+.field label[for="priority"] { color: var(--danger); }
 input, select, button {
   font: inherit;
   border-radius: 10px;

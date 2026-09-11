@@ -4,12 +4,15 @@ id: 46c8491e-581c-4f3d-99f1-2a9fefde99b5
 name: orbit-web
 node: .
 branch: develop
-previous_commit: 57c18edddb7b8ed0b6d7e0f490cf89ff2c57b22e
+previous_commit: ef9e0fc0a7eeccd0daf5f4f9ecae550fd7fa7ada
 ---
 
 ## What changed
-- `public/styles.css`: added a `.cards[hidden] { display: none; }` rule right after the `.cards` declaration, plus a comment explaining why it is needed.
-- `.infrar/knowledge.md`: Notes section now documents the `[hidden]` guard on `.cards`.
+
+- `public/styles.css`: added `.field label[for="priority"] { color: var(--danger); }` right after the generic `.field label` rule, so the composer's **Priority** label renders in the theme red (`--danger`, `#ef4444`) instead of `--muted`.
+
+No markup or client logic changed: `public/index.html` still carries `<label for="priority">Priority</label>`, and the new rule hooks onto that existing `for` attribute.
 
 ## Why
-The board redesign gave `.cards` a `display: grid` rule. An author-set `display` overrides the browser's default `[hidden] { display: none }`, so when app.js set `hidden` on the `#skeleton` list after loading, the three placeholder skeleton cards remained visible — users saw three tasks "stuck loading" above the correctly rendered list. The explicit `[hidden]` guard (the same pattern already used for `.share-form` and `.modal-overlay`) restores the intended one-state-at-a-time board.
+
+The picked element in the preview was `form#new-task > div.field:nth-of-type(2) > label` — the "Priority" label — and the request was to turn its text red. That label shares the `.field label` rule with the "New task" label, so recolouring the shared rule would have reddened both. An attribute-scoped override touches only the picked label and reuses the palette variable already defined in `:root`, keeping the change inside the existing theme.
