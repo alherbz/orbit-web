@@ -334,3 +334,16 @@ input::placeholder { color: var(--muted); }
   .card-row { flex-wrap: wrap; }
   .card-title { flex-basis: 100%; order: -1; }
 }
+
+/* The branch this build came from, said in the header — so two previews of different branches
+   are telling apart at a glance (and the extension's compare mode has something to point at). */
+.branch-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #2f6fed1a;
+  border: 1px solid #2f6fed55;
+  color: #2f6fed;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
