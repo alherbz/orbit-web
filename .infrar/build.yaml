@@ -25,3 +25,5 @@ env:
     default: "3000"
   - name: API_URL
     from: api
+  - name: APP_VERSION
+    default: "dev"
