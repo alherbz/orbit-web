@@ -25,11 +25,3 @@ env:
     default: "3000"
   - name: API_URL
     from: api
-requires:
-  cache:
-    product: redis
-    version: "<6"
-    tenancy: db-index
-    env:
-      - name: WEB_CACHE_URL
-        value: url
