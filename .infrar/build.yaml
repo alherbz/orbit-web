@@ -33,5 +33,4 @@ requires:
     version: "<6"
     tenancy: db-index
     env:
-      - name: WEB_CACHE_URL
-        value: url
+      WEB_CACHE_URL: url
