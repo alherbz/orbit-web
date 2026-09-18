@@ -27,10 +27,3 @@ env:
     from: api
   - name: APP_VERSION
     default: "dev"
-requires:
-  cache:
-    product: redis
-    version: "<6"
-    tenancy: db-index
-    env:
-      WEB_CACHE_URL: url
