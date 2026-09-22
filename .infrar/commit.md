@@ -4,15 +4,15 @@ id: 46c8491e-581c-4f3d-99f1-2a9fefde99b5
 name: orbit-web
 node: .
 branch: develop
-previous_commit: ef9e0fc0a7eeccd0daf5f4f9ecae550fd7fa7ada
+previous_commit: 4162702625b1ac3d6f72b691618516e8d20d7ac8
 ---
 
 ## What changed
 
-- `public/styles.css`: added `.field label[for="priority"] { color: var(--danger); }` right after the generic `.field label` rule, so the composer's **Priority** label renders in the theme red (`--danger`, `#ef4444`) instead of `--muted`.
+- `public/index.html`: the topbar heading is now `<h1>Orbit Demo 2026</h1>` (was `Orbit`), and the document `<title>` is now `Orbit Demo 2026` (was `Orbit — Tasks`).
 
-No markup or client logic changed: `public/index.html` still carries `<label for="priority">Priority</label>`, and the new rule hooks onto that existing `for` attribute.
+Nothing else changed: no CSS selector targets the heading text (`.brand h1` styles it by position) and `app.js` never reads it, so styling and client logic are untouched. The `.branch-badge` next to the heading still reads `develop`, and the welcome modal still says "Welcome to **Orbit**" — that is the product name, not the page title.
 
 ## Why
 
-The picked element in the preview was `form#new-task > div.field:nth-of-type(2) > label` — the "Priority" label — and the request was to turn its text red. That label shares the `.field label` rule with the "New task" label, so recolouring the shared rule would have reddened both. An attribute-scoped override touches only the picked label and reuses the palette variable already defined in `:root`, keeping the change inside the existing theme.
+The request was to change the home title of orbit-web to "Orbit Demo 2026". The name is written literally in two places in `index.html` — the browser tab title and the visible page heading — so both were updated together to keep the tab and the header from drifting apart.
