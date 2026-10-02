@@ -1,5 +1,4 @@
 schema_version: 1
-strategy: dockerfile
 dockerfileContent: |
   FROM node:20-alpine
   WORKDIR /app
@@ -14,12 +13,6 @@ dockerfileContent: |
   COPY . .
 
   EXPOSE 3000
-run:
-  command: node server.js
-  port: 3000
-healthcheck:
-  path: /
-  port: 3000
 env:
   - name: PORT
     default: "3000"
