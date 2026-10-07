@@ -195,6 +195,12 @@ input::placeholder { color: var(--muted); }
 }
 .card--done .card-title { text-decoration: line-through; color: var(--muted); }
 .card--done { opacity: 0.85; }
+.card-owner {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
 
 .badge {
   flex: none;

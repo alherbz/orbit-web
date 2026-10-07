@@ -8,6 +8,7 @@ const countEl = document.querySelector('#count');
 const filterButtons = [...document.querySelectorAll('.filter')];
 const newTaskForm = document.querySelector('#new-task');
 const titleInput = document.querySelector('#title');
+const ownerInput = document.querySelector('#owner');
 const priorityInput = document.querySelector('#priority');
 const submitBtn = newTaskForm.querySelector('button[type="submit"]');
 const formMsg = document.querySelector('#form-msg');
@@ -139,6 +140,10 @@ function taskCard(t) {
 
   row.append(badge, title, doneChip, toggle);
 
+  const owner = document.createElement('p');
+  owner.className = 'card-owner';
+  owner.textContent = `Owner: ${t.owner}`;
+
   const shareForm = document.createElement('form');
   shareForm.className = 'share-form';
   shareForm.hidden = true;
@@ -165,7 +170,7 @@ function taskCard(t) {
   msg.className = 'share-msg';
   msg.hidden = true;
 
-  li.append(row, shareForm, msg, cardActions(t, msg));
+  li.append(row, owner, shareForm, msg, cardActions(t, msg));
   wireShare({ toggle, shareForm, input, send, msg }, t);
   return li;
 }
@@ -363,8 +368,14 @@ for (const btn of filterButtons) {
 // ---------- New task ----------
 newTaskForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const body = { title: titleInput.value.trim(), priority: priorityInput.value };
+  const body = { title: titleInput.value.trim(), owner: ownerInput.value.trim(), priority: priorityInput.value };
   if (!body.title) return;
+  if (!body.owner) {
+    formMsg.textContent = 'Enter an owner for the task.';
+    formMsg.hidden = false;
+    ownerInput.focus();
+    return;
+  }
   submitBtn.disabled = true;
   formMsg.hidden = true;
   try {
@@ -378,6 +389,7 @@ newTaskForm.addEventListener('submit', async (e) => {
       throw new Error(resBody.error || `the server answered HTTP ${res.status}`);
     }
     titleInput.value = '';
+    ownerInput.value = '';
     await load();
     setTimeout(loadActivity, 800);
   } catch (err) {
