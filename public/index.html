@@ -18,7 +18,7 @@
     <header class="topbar">
       <div class="brand">
         <span class="logo" aria-hidden="true"></span>
-        <h1>Orbit run-p0 105200 orbit-cloud</h1>
+        <h1>Orbit</h1>
       </div>
       <p id="health-chip" class="chip" role="status">
         <span class="chip-dot" aria-hidden="true"></span>
@@ -65,6 +65,12 @@
         <ul id="tasks" class="cards" hidden></ul>
         <p id="empty" class="state" hidden></p>
         <p id="error" class="state state--error" role="alert" hidden></p>
+      </section>
+
+      <section class="activity" aria-labelledby="activity-heading">
+        <h2 id="activity-heading">Activity</h2>
+        <p class="activity-hint">Written by the background worker from task events.</p>
+        <ul id="activity" class="activity-list"></ul>
       </section>
     </main>
 

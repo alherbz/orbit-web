@@ -1,9 +1,15 @@
 # orbit-web
 
-Frontend for the **Orbit** demo project — a single **app** node.
+Frontend for **Orbit**, a small team task board. Paired with the `orbit-api`
+repository (API, worker and infrastructure).
 
-A small Express server serves the static Tasks UI and proxies `/api/*` to the
-`orbit-api` service. Reads `API_URL` (wired from the `api` node in preview) and
-`PORT` (default `8080`).
+A small Express server serves the static UI and forwards `/api/*` to orbit-api,
+keeping the `/api` prefix.
 
-Paired with the `orbit-api` repository (backend + infra) that manage tasks and send email using resend.
+| Variable | Required | Meaning |
+|----------|----------|---------|
+| `API_URL` | yes, outside local dev | base URL of orbit-api, e.g. `http://localhost:8083` (default) |
+| `PORT` | no | default `8080` (`3000` in the container image) |
+
+`npm install && npm start`, then open `http://localhost:8080`. The header chip shows
+whether the API and its dependencies (Postgres, Redis, S3) answer.

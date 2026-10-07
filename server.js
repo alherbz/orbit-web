@@ -6,22 +6,22 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 8080);
 
-// API_URL is wired from the `api` node by Infrar at preview launch.
-const API_URL = process.env.API_URL || 'http://localhost:3001';
+// Base URL of the orbit-api service (no path): /api/* is forwarded there as is.
+const API_URL = process.env.API_URL || 'http://localhost:8083';
 
 const app = express();
 
-// The browser only talks to this server; /api/* is proxied to the api node.
+// The browser only talks to this server; /api/* is forwarded to orbit-api with
+// the /api prefix kept (the API serves its routes under /api).
 app.use(
-  '/api',
   createProxyMiddleware({
     target: API_URL,
     changeOrigin: true,
-    pathRewrite: { '^/api': '' },
+    pathFilter: '/api',
   }),
 );
 
-// Liveness probe for the platform: answers without touching the api node.
+// Liveness probe: answers without touching the API.
 app.get('/health', (_req, res) => {
   res.json({
     status: 'ok',

@@ -18,18 +18,45 @@ let tasks = [];
 let filter = 'all';
 
 // ---------- Health chip ----------
-// Polled once at load: green with the storage word when the API answers,
-// muted with a short message when it does not.
+// Polled once at load: green when the API and its three dependencies answer;
+// otherwise it names the ones that do not.
 async function checkHealth() {
   try {
     const res = await fetch('/api/health');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const body = await res.json();
-    chip.classList.add('chip--ok');
-    chipText.textContent = `API online · ${body.storage || 'unknown storage'}`;
+    const body = await res.json().catch(() => ({}));
+    if (!body.deps) throw new Error(`HTTP ${res.status}`);
+    const down = Object.entries(body.deps).filter(([, v]) => v !== 'ok');
+    chip.classList.add(down.length ? 'chip--down' : 'chip--ok');
+    chipText.textContent = down.length
+      ? `Degraded · ${down.map(([k, v]) => `${k}: ${v}`).join(' · ')}`
+      : 'API online · postgres · redis · s3';
   } catch {
     chip.classList.add('chip--down');
     chipText.textContent = 'API unreachable';
+  }
+}
+
+// ---------- Activity feed (written by the worker) ----------
+const activityList = document.querySelector('#activity');
+
+async function loadActivity() {
+  try {
+    const res = await fetch('/api/activity');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const items = await res.json();
+    activityList.replaceChildren(
+      ...items.map((a) => {
+        const li = document.createElement('li');
+        const time = document.createElement('time');
+        time.dateTime = a.created_at;
+        time.textContent = new Date(a.created_at).toLocaleTimeString();
+        li.append(time, document.createTextNode(a.message));
+        return li;
+      }),
+    );
+    if (items.length === 0) activityList.textContent = 'No activity yet.';
+  } catch (err) {
+    activityList.textContent = `Could not load activity: ${err.message}`;
   }
 }
 
@@ -138,9 +165,129 @@ function taskCard(t) {
   msg.className = 'share-msg';
   msg.hidden = true;
 
-  li.append(row, shareForm, msg);
+  li.append(row, shareForm, msg, cardActions(t, msg));
   wireShare({ toggle, shareForm, input, send, msg }, t);
   return li;
+}
+
+// Done/reopen (PATCH, emits a worker event), attachments (S3 via the API),
+// and a signed public link (ORBIT_SIGNING_SECRET).
+function cardActions(t, msg) {
+  const box = document.createElement('div');
+  const actions = document.createElement('div');
+  actions.className = 'card-actions';
+
+  const doneBtn = document.createElement('button');
+  doneBtn.type = 'button';
+  doneBtn.textContent = t.done ? 'Reopen' : 'Mark done';
+  doneBtn.addEventListener('click', async () => {
+    doneBtn.disabled = true;
+    const res = await fetch(`/api/tasks/${t.id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ done: !t.done }),
+    });
+    if (res.ok) {
+      await load();
+      setTimeout(loadActivity, 800);
+    } else {
+      doneBtn.disabled = false;
+      msg.textContent = `Could not update the task (HTTP ${res.status})`;
+      msg.className = 'share-msg err';
+      msg.hidden = false;
+    }
+  });
+
+  const filesBtn = document.createElement('button');
+  filesBtn.type = 'button';
+  filesBtn.textContent = `Files (${t.attachments ?? 0})`;
+
+  const linkBtn = document.createElement('button');
+  linkBtn.type = 'button';
+  linkBtn.textContent = 'Public link';
+  linkBtn.addEventListener('click', async () => {
+    const res = await fetch(`/api/tasks/${t.id}/link`, { method: 'POST' });
+    const body = await res.json().catch(() => ({}));
+    msg.hidden = false;
+    if (res.ok) {
+      const url = `${location.origin}/api/public/tasks/${body.token}`;
+      msg.textContent = `Public link: ${url}`;
+      msg.className = 'share-msg ok';
+      navigator.clipboard?.writeText(url).catch(() => {});
+    } else {
+      msg.textContent = body.error || `Could not create the link (HTTP ${res.status})`;
+      msg.className = 'share-msg err';
+    }
+  });
+
+  actions.append(doneBtn, filesBtn, linkBtn);
+
+  const files = document.createElement('div');
+  files.className = 'files';
+  files.hidden = true;
+  filesBtn.addEventListener('click', () => {
+    files.hidden = !files.hidden;
+    if (!files.hidden) renderFiles(t, files);
+  });
+
+  box.append(actions, files);
+  return box;
+}
+
+async function renderFiles(t, files) {
+  const list = document.createElement('ul');
+  const note = document.createElement('p');
+  note.className = 'files-msg';
+  const upload = document.createElement('input');
+  upload.type = 'file';
+  upload.setAttribute('aria-label', `Attach a file to “${t.title}”`);
+  files.replaceChildren(upload, note, list);
+
+  const refresh = async () => {
+    const res = await fetch(`/api/tasks/${t.id}/attachments`);
+    if (!res.ok) {
+      note.textContent = `Could not list files (HTTP ${res.status})`;
+      note.className = 'files-msg err';
+      return;
+    }
+    const items = await res.json();
+    list.replaceChildren(
+      ...items.map((a) => {
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = `/api/attachments/${a.id}`;
+        link.target = '_blank';
+        link.textContent = `${a.filename} (${Math.ceil(a.size / 1024)} KB)`;
+        li.append(link);
+        return li;
+      }),
+    );
+    if (items.length === 0) note.textContent = 'No files yet.';
+  };
+
+  upload.addEventListener('change', async () => {
+    const file = upload.files?.[0];
+    if (!file) return;
+    note.textContent = 'Uploading…';
+    note.className = 'files-msg';
+    const res = await fetch(`/api/tasks/${t.id}/attachments?filename=${encodeURIComponent(file.name)}`, {
+      method: 'POST',
+      headers: { 'content-type': file.type || 'application/octet-stream' },
+      body: file,
+    });
+    const body = await res.json().catch(() => ({}));
+    if (res.ok) {
+      note.textContent = `Uploaded ${file.name}.`;
+      upload.value = '';
+      await refresh();
+      setTimeout(loadActivity, 800);
+    } else {
+      note.textContent = body.error || `Upload failed (HTTP ${res.status})`;
+      note.className = 'files-msg err';
+    }
+  });
+
+  await refresh();
 }
 
 // Per-card share flow: inline validation, disabled while sending, and a
@@ -232,6 +379,7 @@ newTaskForm.addEventListener('submit', async (e) => {
     }
     titleInput.value = '';
     await load();
+    setTimeout(loadActivity, 800);
   } catch (err) {
     formMsg.textContent = `Could not add the task: ${err.message}`;
     formMsg.hidden = false;
@@ -277,3 +425,4 @@ newTaskForm.addEventListener('submit', async (e) => {
 
 checkHealth();
 load();
+loadActivity();
