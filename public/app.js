@@ -9,6 +9,7 @@ const filterButtons = [...document.querySelectorAll('.filter')];
 const newTaskForm = document.querySelector('#new-task');
 const titleInput = document.querySelector('#title');
 const priorityInput = document.querySelector('#priority');
+const dueDateInput = document.querySelector('#due-date');
 const submitBtn = newTaskForm.querySelector('button[type="submit"]');
 const formMsg = document.querySelector('#form-msg');
 
@@ -166,6 +167,16 @@ function taskCard(t) {
   msg.hidden = true;
 
   li.append(row, shareForm, msg, cardActions(t, msg));
+  if (t.due_date) {
+    const dueDate = document.createElement('time');
+    dueDate.className = 'card-due-date';
+    dueDate.dateTime = t.due_date;
+    const label = new Date(`${t.due_date}T00:00:00Z`).toLocaleDateString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC',
+    });
+    dueDate.textContent = `Due ${label}`;
+    row.after(dueDate);
+  }
   wireShare({ toggle, shareForm, input, send, msg }, t);
   return li;
 }
@@ -363,7 +374,11 @@ for (const btn of filterButtons) {
 // ---------- New task ----------
 newTaskForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const body = { title: titleInput.value.trim(), priority: priorityInput.value };
+  const body = {
+    title: titleInput.value.trim(),
+    priority: priorityInput.value,
+    due_date: dueDateInput.value || null,
+  };
   if (!body.title) return;
   submitBtn.disabled = true;
   formMsg.hidden = true;
@@ -378,6 +393,7 @@ newTaskForm.addEventListener('submit', async (e) => {
       throw new Error(resBody.error || `the server answered HTTP ${res.status}`);
     }
     titleInput.value = '';
+    dueDateInput.value = '';
     await load();
     setTimeout(loadActivity, 800);
   } catch (err) {
