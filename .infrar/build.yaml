@@ -1,0 +1,14 @@
+schema_version: 1
+dockerfile: Dockerfile
+run:
+  api_prefix: /
+requires: {}
+env:
+  - name: PORT
+    default: "3000"
+  - name: API_URL
+    from: orbit-api/api
+    part: origin
+  - name: APP_VERSION
+    from: infrar
+    part: version
